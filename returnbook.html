@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="returnbook.css">
+    <a href="index.html">Main Page</a>
+    <title>Library Management System</title>
+    <style>
+        .input-table {
+            border-collapse: collapse;
+            width: 50%;
+        }
+        .input-table th {
+            background-color: lightgray;
+            /* Add this line to set the background color */
+            border: 3px solid black;
+            padding: 8px;
+        }
+        .input-table td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        .input-table td:first-child {
+            font-weight: bold;
+        }
+        .input-table button {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <table class="input-table">
+        <tr>
+            <td>Customer name:</td>
+            <td>
+                <select id="cust_name" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Book name:</td>
+            <td>
+                <select id="bookname" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Return date:</td>
+            <td><input type="date" id="return_date" required></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button onclick="returnBook()">Return Book</button>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        const MY_SERVER = 'https://pleasework-miz.onrender.com/';
+
+        async function populateCustomerOptions() {
+            try {
+                const response = await axios.get(`${MY_SERVER}/customers`);
+                const customers = response.data;
+
+                const selectElement = document.getElementById('cust_name');
+                selectElement.innerHTML = '';
+
+                customers.forEach((customer) => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = customer.id;
+                    optionElement.textContent = customer.name;
+                    selectElement.appendChild(optionElement);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function populateBookOptions() {
+            try {
+                const response = await axios.get(`${MY_SERVER}/books`);
+                const books = response.data;
+
+                console.log("Books:", books); // Check if the books array is populated correctly
+
+                const selectElement = document.getElementById('bookname');
+                selectElement.innerHTML = '';
+
+                books.forEach((book) => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = book.id;
+                    optionElement.textContent = book.bookname; // Use 'bookname' property
+                    selectElement.appendChild(optionElement);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function returnBook() {
+            event.preventDefault();
+
+            const cust_name = document.getElementById('cust_name').value;
+            const book_name = document.getElementById('bookname').value;
+            const return_date = document.getElementById('return_date').value;
+
+            const data = {
+                'cust_name': cust_name,
+                'bookname': book_name // Use 'bookname' variable
+            };
+
+            try {
+                const response = await axios.post(`${MY_SERVER}/returnbook`, data);
+
+                if (response.status === 200) {
+                    alert("Book returned successfully!");
+                } else {
+                    alert("Error returning book.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error returning book.");
+            }
+        }
+
+        // Populate the customer and book options on page load
+        window.addEventListener('load', () => {
+            populateCustomerOptions();
+            populateBookOptions();
+        });
+    </script>
+</body>
+</html>
